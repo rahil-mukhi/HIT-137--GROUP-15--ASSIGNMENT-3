@@ -11,7 +11,7 @@ import cv2
 from PIL import ImageTk, Image
 
 class ImageEditor:
-    # Creating _init_ method which will get executed at object creation time
+    # Creating init method which will get executed at object creation time
     def __init__(self,root):
         self.root = root
         self.root.title("Python Image Editor - CAS/DAN Group = 15")
@@ -90,7 +90,8 @@ class ImageEditor:
         self.root.bind("<Control-z>", lambda event: self.undo())
         self.root.bind("<Control-y>", lambda event: self.redo())
         self.root.bind("<Control-s>", lambda event: self.save_image())
-def select_image(self):
+
+    def select_image(self):
         # Opens file manager to select a File
         self.filename = filedialog.askopenfilename(
             filetypes=[("Image Files", "*.png *.jpg *.jpeg")],
@@ -193,7 +194,7 @@ def select_image(self):
         else:
             self.canvas_modified.coords(self.crop_id, self.crop_start_x, self.crop_start_y, current_x, current_y)
 
-def on_button_release(self, event):
+    def on_button_release(self, event):
         # Record the final position for crop action
         if not self.crop_mode:
             return
@@ -288,8 +289,9 @@ def on_button_release(self, event):
         self.modified_image = gray_bgr_image
         self.display_image()
         print("Grayscale Successfully!")
-        
-        def rotate(self):
+
+
+    def rotate(self):
         # Rotates image to 90 degrees clockwise
         if self.modified_image is None:
             current_image = self.original_image
@@ -358,7 +360,7 @@ def on_button_release(self, event):
             print("Error! No Image available to save!")
             return
 
-        save_path = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=(("JPG files", "*.jpg"),("PNG files", "*.png"),("JPEG files", ".jpeg")))
+        save_path = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=(("JPG files", ".jpg"),("PNG files", ".png"),("JPEG files", ".jpeg")))
 
         if save_path is None:
             return
