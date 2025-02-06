@@ -192,3 +192,99 @@ def select_image(self):
             self.crop_id = self.canvas_modified.create_rectangle(self.crop_start_x, self.crop_start_y, current_x, current_y, outline="red", width=2)
         else:
             self.canvas_modified.coords(self.crop_id, self.crop_start_x, self.crop_start_y, current_x, current_y)
+
+def on_button_release(self, event):
+        # Record the final position for crop action
+        if not self.crop_mode:
+            return
+        crop_end_x, crop_end_y = event.x, event.y
+
+        # Unbinding crop related events from right side canvas
+        self.canvas_modified.unbind("<ButtonPress-1>")
+        self.canvas_modified.unbind("<B1-Motion>")
+        self.canvas_modified.unbind("<ButtonRelease-1>")
+        self.crop_mode = False
+
+        # Showing cropped image in right canvas
+        canvas_width = self.canvas_modified.winfo_width()
+        canvas_height = self.canvas_modified.winfo_height()
+        x1 = min(self.crop_start_x, canvas_width)
+        y1 = min(self.crop_start_y, canvas_height)
+        x2 = min(crop_end_x, canvas_width)
+        y2 = min(crop_end_y, canvas_height)
+        x1, x2 = sorted([x1, x2])
+        y1, y2 = sorted([y1, y2])
+
+        # If the selected rectangle is too small
+        if x2-x1 < 5 or y2-y1 < 5:
+            print("Selected Area is too small to crop!")
+            if self.crop_id:
+                self.canvas_modified.delete(self.crop_id)
+                self.crop_id = None
+            return
+
+        # Use the cropped image for further editing
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        if current_image is None:
+            print("Error! No Image available to Edit!")
+
+        # Converting canvas coordinates to image coordinates
+        x1_image = int(x1 * self.ratio)
+        y1_image = int(y1 * self.ratio)
+        x2_image = int(x2 * self.ratio)
+        y2_image = int(y2 * self.ratio)
+
+        # Ensuring that the coordinates are within the boundary
+        original_height, original_width = current_image.shape[:2]
+        x1_image = min(original_width, x1_image)
+        y1_image = min(original_height, y1_image)
+        x2_image = min(original_width, x2_image)
+        y2_image = min(original_height, y2_image)
+
+        if x2_image - x1_image < 1 or y2_image - y1_image < 1:
+            print("Crop coordinates out of boundary!!")
+            return
+
+        # Saving current state
+        self.save_state()
+        cropped_image = current_image[y1_image:y2_image, x1_image:x2_image].copy()
+        self.modified_image = cropped_image
+
+        if self.crop_id:
+            self.canvas_modified.delete(self.crop_id)
+            self.crop_id = None
+
+        self.display_image()
+        print("Image Cropped Successfully!")
+
+    def save_state(self):
+        # This saves the current state into undo stack and clears redo stack
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        self.undo_stack.append(current_image.copy())
+        self.redo_stack.clear()
+
+    def grayscale(self):
+        # Converts Colour image to Grayscale
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        if current_image is None:
+            print("Error! No Image available to Grayscale!")
+            return
+
+        self.save_state()
+        gray_image = cv2.cvtColor(current_image, cv2.COLOR_BGR2GRAY)
+        gray_bgr_image = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2BGR)
+        self.modified_image = gray_bgr_image
+        self.display_image()
+        print("Grayscale Successfully!")
