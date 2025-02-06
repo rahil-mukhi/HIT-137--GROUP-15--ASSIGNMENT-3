@@ -288,3 +288,94 @@ def on_button_release(self, event):
         self.modified_image = gray_bgr_image
         self.display_image()
         print("Grayscale Successfully!")
+        
+        def rotate(self):
+        # Rotates image to 90 degrees clockwise
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        if current_image is None:
+            print("Error! No Image available to Rotate!")
+            return
+
+        self.save_state()
+        rotated_image = cv2.rotate(current_image, cv2.ROTATE_90_CLOCKWISE)
+        self.modified_image = rotated_image
+        self.display_image()
+        print("Rotated Successfully!")
+
+    def undo(self):
+        # This will undo last modified action
+        if not self.undo_stack:
+            print("Error! Nothing available to undo!")
+            return
+
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        if current_image is not None:
+            self.redo_stack.append(current_image.copy())
+        previous_image = self.undo_stack.pop()
+        self.modified_image = previous_image
+        self.display_image()
+        print("Image Undo Successfully!")
+
+    def redo(self):
+        # Redo last undone modification
+        if not self.redo_stack:
+            print("Error! Nothing available to redo!")
+            return
+
+        if self.modified_image is None:
+            current_image = self.original_image
+        else:
+            current_image = self.modified_image
+
+        if current_image is not None:
+            self.undo_stack.append(current_image.copy())
+        next_image = self.redo_stack.pop()
+        self.modified_image = next_image
+        self.display_image()
+        print("Image Redo Successfully!")
+
+    def slider(self, value):
+        if self.original_image is None:
+            return
+        self.display_image()
+
+    def save_image(self):
+        # This saves the current state of modified image
+        if self.modified_image is None:
+            image_to_save = self.original_image
+        else:
+            image_to_save = self.modified_image
+
+        if image_to_save is None:
+            print("Error! No Image available to save!")
+            return
+
+        save_path = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=(("JPG files", "*.jpg"),("PNG files", "*.png"),("JPEG files", ".jpeg")))
+
+        if save_path is None:
+            return
+
+        if self.preview_dimensions is not None:
+            new_width, new_height = self.preview_dimensions
+            resized_image = cv2.resize(image_to_save, (new_width, new_height),interpolation=cv2.INTER_AREA)
+        else:
+            resized_image = image_to_save
+
+        cv2.imwrite(save_path, resized_image)
+        print(f"Image Saved to {save_path}")
+
+
+def main():
+    root = Tk()
+    app = ImageEditor(root)
+    root.mainloop()
+
+main()
