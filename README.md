@@ -4,7 +4,7 @@
 ### S374427 - Renish Rajeshkumar Vekariya
 ### S383635 - Rushabhkumar Jaysukhbhai Savaj
 
-# ---------------------------------------------------------------------
+# ----------------------------------------------------------------
 
 # How to run the Code
 ## Install libraries
